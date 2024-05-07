@@ -9,9 +9,9 @@ import { async } from 'regenerator-runtime';
 
 //! Forkify Recipes Web Sites:  https://forkify-api.herokuapp.com/v2
 //parcel..
-if (module.hot) {
+/* if (module.hot) {
   module.hot.accept();
-}
+} */
 
 const controlRecipes = async function () {
   try {
@@ -45,7 +45,8 @@ const controlSearchResults = async function () {
 
     //3)"render" resaults
     /*  console.log(model.state.search.results); */
-    resultsView.render(model.state.search.results);
+    /* resultsView.render(model.state.search.results); */
+    resultsView.render(model.getSearchRsultsPage());
   } catch (err) {
     console.error(err);
   }
