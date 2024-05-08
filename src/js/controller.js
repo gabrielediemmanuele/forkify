@@ -21,6 +21,9 @@ const controlRecipes = async function () {
     if (!id) return; // GuardClass -> se non ci sono id(ricette), non fare nulla.
     recipeView.renderSpinner();
 
+    //* 0) Update results view ti narj sekected search result
+    resultsView.update(model.getSearchRsultsPage());
+
     //* 1) Loading Recipe
     await model.loadRecipe(id);
 
