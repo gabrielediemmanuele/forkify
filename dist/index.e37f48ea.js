@@ -683,6 +683,8 @@ const controlAddRecipe = async function(newRecipe) {
         setTimeout(function() {
             (0, _addRecipeViewJsDefault.default).toggleWindow();
         }, (0, _configJs.MODAL_CLOSE_SEC) * 1000);
+        //*Reload Page ?
+        location.reload();
     } catch (err) {
         console.error("\uD83D\uDCA5", err);
         (0, _addRecipeViewJsDefault.default).renderError(err.message);
@@ -2589,7 +2591,7 @@ const createRecipeObject = function(data) {
 };
 const loadRecipe = async function(id) {
     try {
-        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}/${id}`);
+        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}/${id}?key=${(0, _configJs.KEY)}`);
         state.recipe = createRecipeObject(data);
         if (state.bookmarks.some((bookmark)=>bookmark.id === id)) state.recipe.bookmarked = true;
         else state.recipe.bookmarked = false;
@@ -2602,14 +2604,17 @@ const loadRecipe = async function(id) {
 };
 const loadSearchResults = async function(query) {
     try {
-        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}?search=${query}`);
+        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}?search=${query}&key=${(0, _configJs.KEY)}`);
         state.search.results = data.data.recipes.map((rec)=>{
             return {
                 id: rec.id,
                 title: rec.title,
                 publisher: rec.publisher,
                 sourceUrl: rec.source_url,
-                image: rec.image_url
+                image: rec.image_url,
+                ...rec.key && {
+                    key: rec.key
+                }
             };
         });
         //after new reserch start again to page 1.
@@ -2662,7 +2667,7 @@ const clearBookmarks = function() {
 const uploadRecipe = async function(newRecipe) {
     try {
         const ingredients = Object.entries(newRecipe).filter((entry)=>entry[0].startsWith("ingredient") && entry[1] !== "").map((ing)=>{
-            const ingArr = ing[1].replaceAll(" ", "").split(",");
+            /* const ingArr = ing[1].replaceAll(' ', '').split(','); */ const ingArr = ing[1].split(",").map((el)=>el.trim());
             if (ingArr.length !== 3) throw new Error("Wrong ingredient format! please use the correct format!!");
             const [quantity, unit, description] = ingArr;
             return {
@@ -2843,7 +2848,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
             </div>
           </div>
 
-          <div class="recipe__user-generated">
+          <div class="recipe__user-generated ${this._data.key ? "" : "hidden"}">
             <svg>
               <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
             </svg>
@@ -3326,6 +3331,11 @@ class PreviewView extends (0, _viewJsDefault.default) {
             <div class="preview__data">
                 <h4 class="preview__title">${this._data.title}</h4>
                 <p class="preview__publisher">${this._data.publisher}</p>
+                <div class="preview__user-generated ${this._data.key ? "" : "hidden"}">
+                  <svg>
+                  <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
+                  </svg>
+                </div>
             </div>
         </a>
     </li>
