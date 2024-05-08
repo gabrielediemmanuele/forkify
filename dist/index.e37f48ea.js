@@ -609,12 +609,13 @@ var _regeneratorRuntime = require("regenerator-runtime");
         if (!id) return; // GuardClass -> se non ci sono id(ricette), non fare nulla.
         (0, _recipeViewJsDefault.default).renderSpinner();
         //* 0) Update results view ti narj sekected search result
-        (0, _resultsViewJsDefault.default).update(_modelJs.getSearchRsultsPage());
-        (0, _bookmarksViewJsDefault.default).update(_modelJs.state.bookmarks);
+        (0, _resultsViewJsDefault.default).update(_modelJs.getSearchResultsPage());
         //* 1) Loading Recipe
         await _modelJs.loadRecipe(id);
         //* 2) rendering recipe
         (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
+        //* 3) Updating bookmarks view
+        (0, _bookmarksViewJsDefault.default).update(_modelJs.state.bookmarks);
     } catch (err) {
         console.log(err);
         (0, _recipeViewJsDefault.default).renderError();
@@ -629,7 +630,7 @@ const controlSearchResults = async function() {
         //2) load search results
         await _modelJs.loadSearchResults(query);
         //3)"render" resaults
-        /*  console.log(model.state.search.results); */ /* resultsView.render(model.state.search.results); */ (0, _resultsViewJsDefault.default).render(_modelJs.getSearchRsultsPage());
+        /*  console.log(model.state.search.results); */ /* resultsView.render(model.state.search.results); */ (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage());
         //4) render initial pagination buttons
         (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
     } catch (err) {
@@ -639,7 +640,7 @@ const controlSearchResults = async function() {
 //Buttons
 const controlPagination = function(goToPage) {
     // Render new results
-    (0, _resultsViewJsDefault.default).render(_modelJs.getSearchRsultsPage(goToPage));
+    (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage(goToPage));
     // Render new pagination buttons
     (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
 };
@@ -658,7 +659,11 @@ const controlAddBookmark = function() {
     //3 render bookmarks
     (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookmarks);
 };
+const controlBookmarks = function() {
+    (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookmarks);
+};
 const init = function() {
+    (0, _bookmarksViewJsDefault.default).addHandlerRender(controlBookmarks);
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipes);
     (0, _recipeViewJsDefault.default).addHandlerUpdateServings(controlServings);
     (0, _recipeViewJsDefault.default).addHandlerAddBookmark(controlAddBookmark);
@@ -2521,7 +2526,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "state", ()=>state);
 parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 parcelHelpers.export(exports, "loadSearchResults", ()=>loadSearchResults);
-parcelHelpers.export(exports, "getSearchRsultsPage", ()=>getSearchRsultsPage);
+parcelHelpers.export(exports, "getSearchResultsPage", ()=>getSearchResultsPage);
 parcelHelpers.export(exports, "updateServings", ()=>updateServings);
 parcelHelpers.export(exports, "addBookmark", ()=>addBookmark);
 parcelHelpers.export(exports, "deleteBookmark", ()=>deleteBookmark);
@@ -2580,7 +2585,7 @@ const loadSearchResults = async function(query) {
         throw err;
     }
 };
-const getSearchRsultsPage = function(page = state.search.page) {
+const getSearchResultsPage = function(page = state.search.page) {
     state.search.page = page;
     const start = (page - 1) * state.search.resultsPerPage;
     const end = page * state.search.resultsPerPage;
@@ -2611,6 +2616,15 @@ const deleteBookmark = function(id) {
     if (id === state.recipe.id) state.recipe.bookmarked = false;
     persistBookmarks();
 };
+const init = function() {
+    const storage = localStorage.getItem("bookmarks");
+    if (storage) state.bookmarks = JSON.parse(storage);
+};
+init();
+//debug to test storage epty //! comment init() for debug working.
+const clearBookmarks = function() {
+    localStorage.clear("bookmarks");
+}; /* clearBookmarks(); */ 
 
 },{"regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./config.js":"k5Hzs","./helpers.js":"hGI1E"}],"k5Hzs":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -3195,7 +3209,7 @@ var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class PreviewView extends (0, _viewJsDefault.default) {
     _parentElement = "";
-    _generateMarkupPreview() {
+    _generateMarkup() {
         const id = window.location.hash.slice(1);
         return `
     <li class="preview">
@@ -3287,6 +3301,9 @@ class BookmarksView extends (0, _viewJsDefault.default) {
     _parentElement = document.querySelector(".bookmarks__list");
     _errorMessage = "No bookmarks yet! Find a nice recipe and bookmark it \uD83D\uDE01";
     _message = "";
+    addHandlerRender(handler) {
+        window.addEventListener("load", handler);
+    }
     _generateMarkup() {
         return this._data.map((bookmark)=>(0, _previewViewJsDefault.default).render(bookmark, false)).join("");
     }

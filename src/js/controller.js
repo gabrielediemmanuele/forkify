@@ -23,14 +23,16 @@ const controlRecipes = async function () {
     recipeView.renderSpinner();
 
     //* 0) Update results view ti narj sekected search result
-    resultsView.update(model.getSearchRsultsPage());
-    bookmarksView.update(model.state.bookmarks);
+    resultsView.update(model.getSearchResultsPage());
 
     //* 1) Loading Recipe
     await model.loadRecipe(id);
 
     //* 2) rendering recipe
     recipeView.render(model.state.recipe);
+
+    //* 3) Updating bookmarks view
+    bookmarksView.update(model.state.bookmarks);
   } catch (err) {
     console.log(err);
     recipeView.renderError();
@@ -52,7 +54,7 @@ const controlSearchResults = async function () {
     //3)"render" resaults
     /*  console.log(model.state.search.results); */
     /* resultsView.render(model.state.search.results); */
-    resultsView.render(model.getSearchRsultsPage());
+    resultsView.render(model.getSearchResultsPage());
 
     //4) render initial pagination buttons
     paginationView.render(model.state.search);
@@ -64,7 +66,7 @@ const controlSearchResults = async function () {
 
 const controlPagination = function (goToPage) {
   // Render new results
-  resultsView.render(model.getSearchRsultsPage(goToPage));
+  resultsView.render(model.getSearchResultsPage(goToPage));
   // Render new pagination buttons
   paginationView.render(model.state.search);
 };
@@ -81,13 +83,20 @@ const controlAddBookmark = function () {
   //1) add or remove bookmark
   if (!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
   else model.deleteBookmark(model.state.recipe.id);
+
   //2) update recipe view
   recipeView.update(model.state.recipe);
 
   //3 render bookmarks
   bookmarksView.render(model.state.bookmarks);
 };
+
+const controlBookmarks = function () {
+  bookmarksView.render(model.state.bookmarks);
+};
+
 const init = function () {
+  bookmarksView.addHandlerRender(controlBookmarks);
   recipeView.addHandlerRender(controlRecipes);
   recipeView.addHandlerUpdateServings(controlServings);
   recipeView.addHandlerAddBookmark(controlAddBookmark);

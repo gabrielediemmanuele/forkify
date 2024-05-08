@@ -62,7 +62,7 @@ export const loadSearchResults = async function (query) {
   }
 };
 
-export const getSearchRsultsPage = function (page = state.search.page) {
+export const getSearchResultsPage = function (page = state.search.page) {
   state.search.page = page;
 
   const start = (page - 1) * state.search.resultsPerPage;
@@ -100,3 +100,15 @@ export const deleteBookmark = function (id) {
 
   persistBookmarks();
 };
+
+const init = function () {
+  const storage = localStorage.getItem('bookmarks');
+  if (storage) state.bookmarks = JSON.parse(storage);
+};
+init();
+
+//debug to test storage epty //! comment init() for debug working.
+const clearBookmarks = function () {
+  localStorage.clear('bookmarks');
+};
+/* clearBookmarks(); */
