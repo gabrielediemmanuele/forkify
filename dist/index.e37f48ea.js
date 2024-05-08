@@ -2555,6 +2555,8 @@ const loadSearchResults = async function(query) {
                 image: rec.image_url
             };
         });
+        //after new reserch start again to page 1.
+        state.search.page = 1;
     } catch (err) {
         console.error(`${err} \u{1F4A5}`);
         throw err;
